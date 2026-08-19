@@ -14,6 +14,7 @@ class LiveActivityChannel {
     required double distanceKm,
     required int etaMinutes,
     required String stage, // 'preparing' | 'pickedup' | 'arriving'
+    required String status,
   }) async {
     try {
       final String? id = await _channel.invokeMethod('startActivity', {
@@ -24,8 +25,13 @@ class LiveActivityChannel {
         'distanceKm': distanceKm,
         'etaMinutes': etaMinutes,
         'stage': stage,
+        'status': status,
       });
       return id;
+    } on MissingPluginException {
+      // Not iOS (Android/web/macOS): no native handler, so skip quietly.
+      debugPrint('Live Activities are iOS-only; skipping.');
+      return null;
     } on PlatformException catch (e) {
       debugPrint('startActivity failed: ${e.message}');
       return null;
@@ -48,6 +54,9 @@ class LiveActivityChannel {
         'stage': stage,
         'status': status,
       });
+    } on MissingPluginException {
+      // Not iOS (Android/web/macOS): no native handler, so skip quietly.
+      debugPrint('Live Activities are iOS-only; skipping.');
     } on PlatformException catch (e) {
       debugPrint('updateActivity failed: ${e.message}');
     }
@@ -63,6 +72,9 @@ class LiveActivityChannel {
         'activityId': activityId,
         'finalMessage': finalMessage,
       });
+    } on MissingPluginException {
+      // Not iOS (Android/web/macOS): no native handler, so skip quietly.
+      debugPrint('Live Activities are iOS-only; skipping.');
     } on PlatformException catch (e) {
       debugPrint('endActivity failed: ${e.message}');
     }
@@ -82,6 +94,10 @@ class LiveActivityChannel {
         },
       );
       return savedPath;
+    } on MissingPluginException {
+      // Not iOS (Android/web/macOS): no native handler, so skip quietly.
+      debugPrint('Live Activities are iOS-only; skipping.');
+      return null;
     } on PlatformException catch (e) {
       debugPrint('saveImageToAppGroup failed: ${e.message}');
       return null;
