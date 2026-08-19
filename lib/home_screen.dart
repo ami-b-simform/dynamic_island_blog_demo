@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'tracking_screen.dart';
 import 'channel/live_activity_channel.dart';
+import 'models/driver.dart';
+import 'tracking_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   static const _drivers = [
-    {
-      'name': 'Rahul K.',
-      'car': 'Swift Dzire',
-      'plate': 'GJ 01 AB 1234',
-      'distance': 3.2,
-      'eta': 8,
-      'asset': 'assets/images/driver1.jpeg',
-      'fileName': 'driver1.jpeg',
-    },
-    {
-      'name': 'Priya M.',
-      'car': 'Honda City',
-      'plate': 'GJ 05 CD 5678',
-      'distance': 1.8,
-      'eta': 5,
-      'asset': 'assets/images/driver2.jpeg',
-      'fileName': 'driver2.jpeg',
-    },
+    Driver(
+      name: 'Rahul K.',
+      car: 'Swift Dzire',
+      plate: 'GJ 01 AB 1234',
+      distanceKm: 3.2,
+      etaMinutes: 8,
+      assetPath: 'assets/images/driver1.jpeg',
+    ),
+    Driver(
+      name: 'Priya M.',
+      car: 'Honda City',
+      plate: 'GJ 05 CD 5678',
+      distanceKm: 1.8,
+      etaMinutes: 5,
+      assetPath: 'assets/images/driver2.jpeg',
+    ),
   ];
 
   @override
@@ -72,14 +70,14 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _DriverCard extends StatelessWidget {
-  final Map<String, dynamic> driver;
+  final Driver driver;
   const _DriverCard({required this.driver});
 
   Future<void> _startRide(BuildContext context) async {
     // Save image to App Group first
     final imagePath = await LiveActivityChannel.saveImageToAppGroup(
-      assetPath: driver['asset'] as String,
-      fileName: driver['fileName'] as String,
+      assetPath: driver.assetPath,
+      fileName: driver.fileName,
     );
 
     if (!context.mounted) return;
@@ -88,12 +86,12 @@ class _DriverCard extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => TrackingScreen(
-          driverName: driver['name'] as String,
-          carModel: driver['car'] as String,
-          plateNumber: driver['plate'] as String,
+          driverName: driver.name,
+          carModel: driver.car,
+          plateNumber: driver.plate,
           driverImagePath: imagePath ?? '',
-          initialDistanceKm: driver['distance'] as double,
-          initialEtaMinutes: driver['eta'] as int,
+          initialDistanceKm: driver.distanceKm,
+          initialEtaMinutes: driver.etaMinutes,
         ),
       ),
     );
@@ -110,7 +108,7 @@ class _DriverCard extends StatelessWidget {
           color: const Color(0xFF1A1A1A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF6C47FF).withOpacity(0.25),
+            color: const Color(0xFF6C47FF).withValues(alpha: 0.25),
           ),
         ),
         child: Row(
@@ -121,14 +119,14 @@ class _DriverCard extends StatelessWidget {
               height: 52,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: const Color(0xFF6C47FF).withOpacity(0.15),
+                color: const Color(0xFF6C47FF).withValues(alpha: 0.15),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(14),
                 child: Image.asset(
-                  driver['asset'] as String,
+                  driver.assetPath,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, _, _) => const Icon(
                     Icons.person_rounded,
                     color: Color(0xFF6C47FF),
                   ),
@@ -141,7 +139,7 @@ class _DriverCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    driver['name'] as String,
+                    driver.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -150,7 +148,7 @@ class _DriverCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${driver['car']} · ${driver['plate']}',
+                    '${driver.car} · ${driver.plate}',
                     style: const TextStyle(
                       color: Colors.white38,
                       fontSize: 12,
@@ -163,7 +161,7 @@ class _DriverCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '${(driver['distance'] as double).toStringAsFixed(1)} km',
+                  '${driver.distanceKm.toStringAsFixed(1)} km',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,
@@ -171,7 +169,7 @@ class _DriverCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${driver['eta']} min',
+                  '${driver.etaMinutes} min',
                   style: const TextStyle(
                     color: Colors.white38,
                     fontSize: 12,

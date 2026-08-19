@@ -3,19 +3,39 @@ import WidgetKit
 import SwiftUI
 import UIKit
 
-private let appGroupID = "group.com.example.dynamicIslandFlutter"
+// MARK: - Driver Photo
 
-private func loadImageFromAppGroup(fileName: String) -> UIImage? {
-    guard let container = FileManager.default
-        .containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
-    else { return nil }
+/// The driver photo, loaded from the App Group container shared with the app.
+///
+/// `ImageHelper` lives in `ios/Shared/` and is compiled into both targets, so
+/// the container path is defined in exactly one place.
+struct DriverPhoto<Fallback: View>: View {
+    let context: ActivityViewContext<RideAttributes>
+    let size: CGFloat
+    var ringWidth: CGFloat = 0
+    @ViewBuilder let fallback: () -> Fallback
 
-    let fileURL = container
-        .appendingPathComponent("DriverImages")
-        .appendingPathComponent(fileName)
-
-    guard let data = try? Data(contentsOf: fileURL) else { return nil }
-    return UIImage(data: data)
+    var body: some View {
+        if let image = ImageHelper.loadImageFromAppGroup(
+            fileName: URL(fileURLWithPath:
+                context.attributes.driverImagePath
+            ).lastPathComponent
+        ) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(Circle())
+                .overlay(
+                    Circle().stroke(
+                        stageColor(context.state.stage),
+                        lineWidth: ringWidth
+                    )
+                )
+        } else {
+            fallback()
+        }
+    }
 }
 
 // MARK: - Live Activity Widget
@@ -61,23 +81,12 @@ struct CompactLeadingView: View {
     let context: ActivityViewContext<RideAttributes>
 
     var body: some View {
-        if let image = loadImageFromAppGroup(
-            fileName: URL(fileURLWithPath:
-                context.attributes.driverImagePath
-            ).lastPathComponent
-        ) {
-            Image(uiImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 26, height: 26)
-                .clipShape(Circle())
-                .padding(.leading, 4)
-        } else {
+        DriverPhoto(context: context, size: 26) {
             Image(systemName: "car.fill")
                 .foregroundColor(stageColor(context.state.stage))
                 .font(.system(size: 14))
-                .padding(.leading, 4)
         }
+        .padding(.leading, 4)
     }
 }
 
@@ -120,24 +129,7 @@ struct ExpandedLeadingView: View {
     var body: some View {
         HStack(spacing: 8) {
             // Driver photo
-            if let image = loadImageFromAppGroup(
-                fileName: URL(fileURLWithPath:
-                    context.attributes.driverImagePath
-                ).lastPathComponent
-            ) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 44, height: 44)
-                    .clipShape(Circle())
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                stageColor(context.state.stage),
-                                lineWidth: 2
-                            )
-                    )
-            } else {
+            DriverPhoto(context: context, size: 44, ringWidth: 2) {
                 Circle()
                     .fill(stageColor(context.state.stage)
                         .opacity(0.2))
@@ -231,22 +223,15 @@ struct LockScreenView: View {
     var body: some View {
         HStack(spacing: 14) {
             // Driver photo
-            if let image = loadImageFromAppGroup(
-                fileName: URL(fileURLWithPath:
-                    context.attributes.driverImagePath
-                ).lastPathComponent
-            ) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
+            DriverPhoto(context: context, size: 52, ringWidth: 2) {
+                Circle()
+                    .fill(stageColor(context.state.stage)
+                        .opacity(0.2))
                     .frame(width: 52, height: 52)
-                    .clipShape(Circle())
                     .overlay(
-                        Circle()
-                            .stroke(
-                                stageColor(context.state.stage),
-                                lineWidth: 2
-                            )
+                        Image(systemName: "person.fill")
+                            .foregroundColor(
+                                stageColor(context.state.stage))
                     )
             }
 
@@ -291,40 +276,6 @@ struct LockScreenView: View {
         .padding(16)
         .background(Color.black.opacity(0.85))
     }
-}
-
-// MARK: - Placeholder Widget (required)
-
-struct RideTrackerWidget: Widget {
-    let kind: String = "RideTrackerWidget"
-
-    var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { _ in
-            Text("Ride Tracker")
-        }
-        .configurationDisplayName("Ride Tracker")
-        .description("Live ride tracking in Dynamic Island")
-        .supportedFamilies([.systemSmall])
-    }
-}
-
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date())
-    }
-    func getSnapshot(in context: Context,
-        completion: @escaping (SimpleEntry) -> Void) {
-        completion(SimpleEntry(date: Date()))
-    }
-    func getTimeline(in context: Context,
-        completion: @escaping (Timeline<SimpleEntry>) -> Void) {
-        completion(Timeline(entries: [SimpleEntry(date: Date())],
-            policy: .never))
-    }
-}
-
-struct SimpleEntry: TimelineEntry {
-    let date: Date
 }
 
 // MARK: - Helpers

@@ -198,7 +198,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   color: const Color(0xFF1A1A1A),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
-                    color: _stageColor.withOpacity(0.4),
+                    color: _stageColor.withValues(alpha: 0.4),
                     width: 1.5,
                   ),
                 ),
@@ -216,8 +216,8 @@ class _TrackingScreenState extends State<TrackingScreen> {
                         child: Image.asset(
                           'assets/images/driver1.jpeg',
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => CircleAvatar(
-                            backgroundColor: _stageColor.withOpacity(0.2),
+                          errorBuilder: (_, _, _) => CircleAvatar(
+                            backgroundColor: _stageColor.withValues(alpha: 0.2),
                             child: Icon(
                               Icons.person_rounded,
                               color: _stageColor,
@@ -412,7 +412,7 @@ class _Stat extends StatelessWidget {
             const SizedBox(width: 3),
             Text(
               unit,
-              style: TextStyle(color: color.withOpacity(0.7), fontSize: 14),
+              style: TextStyle(color: color.withValues(alpha: 0.7), fontSize: 14),
             ),
           ],
         ),
