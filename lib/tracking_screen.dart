@@ -90,6 +90,7 @@ class _TrackingScreenState extends State<TrackingScreen> {
       distanceKm: _distanceKm,
       etaMinutes: _etaMinutes,
       stage: _stageKey,
+      status: _stageLabel,
     );
     if (!mounted) return;
 
