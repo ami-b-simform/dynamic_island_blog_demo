@@ -14,6 +14,7 @@ class LiveActivityChannel {
     required double distanceKm,
     required int etaMinutes,
     required String stage, // 'preparing' | 'pickedup' | 'arriving'
+    required String status,
   }) async {
     try {
       final String? id = await _channel.invokeMethod('startActivity', {
@@ -24,6 +25,7 @@ class LiveActivityChannel {
         'distanceKm': distanceKm,
         'etaMinutes': etaMinutes,
         'stage': stage,
+        'status': status,
       });
       return id;
     } on PlatformException catch (e) {
