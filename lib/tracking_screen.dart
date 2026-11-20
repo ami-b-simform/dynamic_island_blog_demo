@@ -119,7 +119,10 @@ class _TrackingScreenState extends State<TrackingScreen> {
       if (_stage == RideStage.delivered) return;
 
       setState(() {
-        _distanceKm = (_distanceKm - 0.25).clamp(0.0, 99.0);
+        // 0.5 km per tick keeps the longest ride (~21s) inside the ~30s
+        // background window AppDelegate requests, so it finishes while the
+        // phone is locked.
+        _distanceKm = (_distanceKm - 0.5).clamp(0.0, 99.0);
         _etaMinutes = (_etaMinutes - 1).clamp(0, 99);
 
         if (_distanceKm > 2.0) {

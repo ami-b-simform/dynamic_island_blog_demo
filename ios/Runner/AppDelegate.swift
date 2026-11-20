@@ -9,6 +9,28 @@ import ActivityKit
     // Store as Any so AppDelegate remains available on all iOS versions.
     private var activities: [String: Any] = [:]
 
+    // The ride is simulated by a Dart timer. iOS suspends the app a few
+    // seconds after it leaves the foreground, which would freeze the Live
+    // Activity mid-ride. A background task buys ~30s, enough for the demo
+    // ride to reach "delivered". (A real app would drive updates with
+    // ActivityKit push notifications from a server instead.)
+    private var rideBackgroundTask: UIBackgroundTaskIdentifier = .invalid
+
+    private func beginRideBackgroundTask() {
+        endRideBackgroundTask()
+        rideBackgroundTask = UIApplication.shared.beginBackgroundTask(
+            withName: "RideSimulation"
+        ) { [weak self] in
+            self?.endRideBackgroundTask()
+        }
+    }
+
+    private func endRideBackgroundTask() {
+        guard rideBackgroundTask != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(rideBackgroundTask)
+        rideBackgroundTask = .invalid
+    }
+
     override func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions:
@@ -157,6 +179,7 @@ import ActivityKit
                     pushType: nil
                 )
                 self.activities[activity.id] = activity
+                self.beginRideBackgroundTask()
                 print("AppDelegate: Activity started — \(activity.id)")
                 result(activity.id)
             } catch {
@@ -224,6 +247,7 @@ import ActivityKit
                     )
                 )
                 self.activities.removeValue(forKey: activityId)
+                if self.activities.isEmpty { self.endRideBackgroundTask() }
                 print("AppDelegate: Activity ended — \(activityId)")
                 result(nil)
             }
