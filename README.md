@@ -3,7 +3,7 @@
 Ride tracking in a real iOS **Live Activity**, driven from Flutter over a
 MethodChannel, with the driver photo passed to the widget through an App Group.
 
-📖 Full write-up: [Dynamic Island + Flutter](https://medium.com/@ami.b_7192/9cfbc782e740)
+📖 Full write-up: [Dynamic Island + Flutter](https://medium.com/simform-engineering/dynamic-island-flutter-real-time-tracking-without-leaving-the-lock-screen-819698cb370f)
 
 <p align="center">
   <img src="docs/demo.gif" alt="Picking a ride and watching the Live Activity track it" width="320">
